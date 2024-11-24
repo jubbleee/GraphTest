@@ -18,7 +18,7 @@ class Graph:
             # create nodes
             for i in range(n):
                 for j in range(n):
-                    node_id = i * n + j  #column no. + row
+                    node_id = j * n + i  #column no. + row
                     position = (i, j)
                     self.nodes[(i, j)] = node.Node(node_id, position)
 
@@ -74,7 +74,6 @@ class Graph:
                         topRightNode = self.nodes[(i - 1, j -(1- (i % 2)))]
                         self.connections.append(
                         connection.Connection(currentNode, topRightNode, random.randint(1, 50)))
-
 
         return self.nodes, self.connections
 
