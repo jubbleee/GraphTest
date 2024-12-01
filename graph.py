@@ -77,6 +77,20 @@ class Graph:
 
         return self.nodes, self.connections
 
+    def moveNodes(self, displace):
+        count = 0
+        length = int(numpy.sqrt(len(self.nodes)))
+        for node in self.nodes.values():
+            if node.id < length:
+                continue
+            else:
+                y = list(node.position)
+                y[0] += float(displace[count])
+                y[1] += float(displace[count+1])
+                node.position = tuple(y)
+            count += 2
+        for node in self.nodes.values():
+            print(node.position)
 
     # function to draw graph with colour mapped connection weights
     def visualOutput(self):
@@ -84,9 +98,11 @@ class Graph:
 
         #node drawing - take all node's position to draw
         for node in self.nodes.values():
+            #if node.id < int(numpy.sqrt(len(self.nodes))):
+            #    continue
             G.add_node(node.id, pos=node.position)
         pos = networkx.get_node_attributes(G, 'pos')
-        networkx.draw(G, pos, with_labels=True, node_size=300, node_color="gray", font_size=8)
+        networkx.draw(G, pos, with_labels=True, node_size=150, node_color="gray", font_size=6)
 
 
         # connection drawing - assign colour and positions
@@ -100,9 +116,20 @@ class Graph:
 
         # draw connections with respective colour map values
         for connection in self.connections:
+            #if connection.node1.id < int(numpy.sqrt(len(self.nodes))) or connection.node2.id < int(numpy.sqrt(len(self.nodes))):
+            #    continue
             connectColour = cmap(norm(connection.weight))
             networkx.draw_networkx_edges(G, pos, edgelist=[(connection.node1.id, connection.node2.id)],
                                    edge_color=[connectColour], width=2)
 
         # output graph
+
+        for node in self.nodes.values():
+            if  node.id < int(numpy.sqrt(len(self.nodes))):
+            #if 2 * int(numpy.sqrt(len(self.nodes))) > node.id > int(numpy.sqrt(len(self.nodes))):
+                plot.arrow(node.position[0], node.position[1], 0, -0.4, head_width=0.1, head_length=0.1)
+            if node.id > len(self.nodes)-(numpy.sqrt(len(self.nodes))) - 1:
+                plot.arrow(node.position[0], node.position[1], 0, 0.4, head_width=0.1, head_length=0.1)
+
+
         plot.show()
