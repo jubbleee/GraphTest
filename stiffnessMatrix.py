@@ -19,22 +19,26 @@ def createGlobalMatrix(graph):
         s = np.sin(angle)
 
         #create element matrix from angle
-        elementMatrix = [[c**2, c*s,-c**2,-c*s],[c*s,s**2,-c*s,-s**2],[-c**2,-c*s,c**2,c*s],[-c*s,-s**2,c*s,s**2]]
-        elementMatrix = np.dot(elementMatrix, 1/length)
+        elementMatrix = [[c**2, c*s,-c**2,-c*s]
+                        ,[c*s,s**2,-c*s,-s**2],
+                         [-c**2,-c*s,c**2,c*s],
+                         [-c*s,-s**2,c*s,s**2]]
 
-        id1 = edge.node1.id
-        id2 = edge.node2.id
+        elementMatrix = np.dot(elementMatrix, 1/length*edge.weight)
+
+        id1 = edge.node1.id * 2
+        id2 = edge.node2.id * 2
 
         '''
         append each part of element matrix to respective nodes
-        id*2 - 2 finds correct index for corresponding node
+        id - 2 finds correct index for corresponding node
         the global matrix is size 2N*2N
         '''
 
-        globalMatrix[id1 * 2:id1 * 2 + 2, id1 * 2:id1 * 2 + 2] += elementMatrix[0:2,0:2]
-        globalMatrix[id2 * 2:id2 * 2 + 2, id1 * 2:id1 * 2 + 2] += elementMatrix[2:4,0:2]
-        globalMatrix[id1 * 2:id1 * 2 + 2, id2 * 2:id2 * 2 + 2] += elementMatrix[0:2,2:4]
-        globalMatrix[id2 * 2:id2 * 2 + 2, id2 * 2:id2 * 2 + 2] += elementMatrix[2:4,2:4]
+        globalMatrix[id1:id1 + 2, id1:id1 + 2] += elementMatrix[0:2,0:2]
+        globalMatrix[id2:id2 + 2, id1:id1 + 2] += elementMatrix[2:4,0:2]
+        globalMatrix[id1:id1 + 2, id2:id2 + 2] += elementMatrix[0:2,2:4]
+        globalMatrix[id2:id2 + 2, id2:id2 + 2] += elementMatrix[2:4,2:4]
 
     #add constraints on bottom nodes
     for i in range(size):
@@ -59,8 +63,17 @@ def findDisplacements(graph, stiffness):
         elif i % 2 != 0 and i <= 2 * np.sqrt(size): #bottom nodes
             forces[i,0] = -1
 
-    displacements = np.linalg.solve(stiffness,forces)
+    try:
+        displacements = np.linalg.solve(stiffness,forces)
+        displacements = np.multiply(displacements,0.001)
 
+    except np.linalg.linalg.LinAlgError:
+        displacements = []
+        displacements.append("Stop")
+
+    return displacements
+
+''' debug file creator
     np.savetxt(
         "stiffness.csv",
         stiffness,
@@ -76,5 +89,20 @@ def findDisplacements(graph, stiffness):
         displacements,
         delimiter=","
     )
+'''
 
-    return displacements
+def findLength(graph):
+    lengths = []
+    for edge in graph.connections:
+
+        '''
+        find length of connection and angle to the x-axis
+        this is used to create the element stiffness matrix
+        '''
+
+        deltaX = edge.node1.position[0] - edge.node2.position[0]
+        deltaY = edge.node1.position[1] - edge.node2.position[1]
+        length = np.sqrt(deltaX**2 + deltaY**2)
+        lengths.append(length)
+
+    return lengths
