@@ -24,16 +24,10 @@ def createGlobalMatrix(graph):
                          [-c**2,-c*s,c**2,c*s],
                          [-c*s,-s**2,c*s,s**2]]
 
-        elementMatrix = np.dot(elementMatrix, 1/length*edge.weight)
+        elementMatrix = np.dot(elementMatrix, 1/length)
 
         id1 = edge.node1.id * 2
         id2 = edge.node2.id * 2
-
-        '''
-        append each part of element matrix to respective nodes
-        id - 2 finds correct index for corresponding node
-        the global matrix is size 2N*2N
-        '''
 
         globalMatrix[id1:id1 + 2, id1:id1 + 2] += elementMatrix[0:2,0:2]
         globalMatrix[id2:id2 + 2, id1:id1 + 2] += elementMatrix[2:4,0:2]
@@ -42,10 +36,9 @@ def createGlobalMatrix(graph):
 
     #add constraints on bottom nodes
     for i in range(size):
-        globalMatrix = np.delete(globalMatrix,i*2,axis=0)
-        globalMatrix = np.delete(globalMatrix,i*2,axis=1)
-        globalMatrix = np.delete(globalMatrix,i*2+1,axis=0)
-        globalMatrix = np.delete(globalMatrix,i*2+1,axis=1)
+        globalMatrix = np.delete(globalMatrix,slice(i*2,i*2+2),axis=0)
+        globalMatrix = np.delete(globalMatrix,slice(i*2,i*2+2),axis=1)
+
 
     return globalMatrix
 
@@ -60,12 +53,12 @@ def findDisplacements(graph, stiffness):
     for i in range(len(forces)):
         if i % 2 != 0 and i >= (len(forces) - 2 * np.sqrt(size)): #top nodes
             forces[i, 0] = 1
-        elif i % 2 != 0 and i <= 2 * np.sqrt(size): #bottom nodes
-            forces[i,0] = -1
+        #elif i % 2 != 0 and i <= 2 * np.sqrt(size): #bottom nodes
+        #   forces[i,0] = -1
 
     try:
         displacements = np.linalg.solve(stiffness,forces)
-        displacements = np.multiply(displacements,0.001)
+        displacements = np.multiply(displacements,0.01)
 
     except np.linalg.linalg.LinAlgError:
         displacements = []

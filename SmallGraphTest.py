@@ -52,30 +52,56 @@ class Graph:
 
 # Create the triangular lattice graph
 def createLattice(graph, spacing=1):
-    # Node positions
-    bottomPos = (0, 0)  # Bottom node
-    midLeftPos = (-spacing * math.cos(math.radians(60)), spacing * math.sin(math.radians(60)))  # Left middle node
-    midRightPos = (spacing * math.cos(math.radians(60)), spacing * math.sin(math.radians(60)))  # Right middle node
-    topPos = (0, 2 * spacing * math.sin(math.radians(60)))  # Top node
+    '''
+            3       4
+          /   \   /   \
+         0______1______2
+    '''
 
-    # Create nodes
-    bottom = Node(0, bottomPos)
-    midLeft = Node(1, midLeftPos)
-    midRight = Node(2, midRightPos)
-    top = Node(3, topPos)
+    node0 = Node(0,(0,0))
+    node1 = Node(1, (1, 0))
+    node2 = Node(2, (2, 0))
+    node3 = Node(3, (0.5, math.sin(math.radians(60))))
+    node4 = Node(4, (1.5, math.sin(math.radians(60))))
 
-    # Add nodes to graph
-    graph.addNode(bottom)
-    graph.addNode(midLeft)
-    graph.addNode(midRight)
-    graph.addNode(top)
+    graph.addNode(node0)
+    graph.addNode(node1)
+    graph.addNode(node2)
+    graph.addNode(node3)
+    graph.addNode(node4)
 
     # Create connections
-    graph.addConnection(Connection(0, 1))  # Bottom to middle-left
-    graph.addConnection(Connection(0, 2))  # Bottom to middle-right
-    graph.addConnection(Connection(1, 3))  # Middle-left to top
-    graph.addConnection(Connection(2, 3))  # Middle-right to top
-    graph.addConnection(Connection(0, 3))  # Bottom to top (direct connection)
+    graph.addConnection(Connection(0, 1))
+    graph.addConnection(Connection(0, 3))
+    graph.addConnection(Connection(1, 2))
+    graph.addConnection(Connection(1, 3))
+    graph.addConnection(Connection(1, 4))
+    graph.addConnection(Connection(2, 4))
+
+    # Node positions
+    #bottomPos = (0, 0)  # Bottom node
+    #midLeftPos = (-spacing * math.cos(math.radians(60)), spacing * math.sin(math.radians(60)))  # Left middle node
+    #midRightPos = (spacing * math.cos(math.radians(60)), spacing * math.sin(math.radians(60)))  # Right middle node
+    #topPos = (0, 2 * spacing * math.sin(math.radians(60)))  # Top node
+
+    # Create nodes
+    #bottom = Node(0, bottomPos)
+    #midLeft = Node(1, midLeftPos)
+    #midRight = Node(2, midRightPos)
+    #top = Node(3, topPos)
+
+    # Add nodes to graph
+    #graph.addNode(bottom)
+    #graph.addNode(midLeft)
+    #graph.addNode(midRight)
+    #graph.addNode(top)
+
+    # Create connections
+    #graph.addConnection(Connection(0, 1))  # Bottom to middle-left
+    #graph.addConnection(Connection(0, 2))  # Bottom to middle-right
+    #graph.addConnection(Connection(1, 3))  # Middle-left to top
+    #graph.addConnection(Connection(2, 3))  # Middle-right to top
+    #graph.addConnection(Connection(1, 2))  # Across the middle
 
 def createGlobalMatrix(graph):
     # Initialize the global stiffness matrix
@@ -108,8 +134,8 @@ def createGlobalMatrix(graph):
         globalMatrix[id1:id1 + 2, id2:id2 + 2] += elementMatrix[0:2, 2:4]
         globalMatrix[id2:id2 + 2, id2:id2 + 2] += elementMatrix[2:4, 2:4]
 
-    globalMatrix = np.delete(globalMatrix, [0,2] , axis=0)
-    globalMatrix = np.delete(globalMatrix, [0,2] , axis=1)
+    globalMatrix = np.delete(globalMatrix, slice(0,6) , axis=0)
+    globalMatrix = np.delete(globalMatrix, slice(0,6) , axis=1)
     #globalMatrix = np.delete(globalMatrix, 1, axis=0)
     #globalMatrix = np.delete(globalMatrix, 1, axis=1)
 
@@ -117,21 +143,30 @@ def createGlobalMatrix(graph):
 
 def computeDisplacements(graph):
     globalMatrix = createGlobalMatrix(graph)
-    forces = [0,0,0,0,0,1]
+
+    np.set_printoptions(precision=3, suppress=True)
+    print(globalMatrix)
+
+    #forces = [0,0,0,0,0,1]
+    forces = [0,1,0,1]
     displacements = np.linalg.solve(globalMatrix, forces)
+    print(np.linalg.det(globalMatrix))
 
-    displacements = np.insert(displacements, 0, [0,0])
-
+    displacements = np.insert(displacements, 0, [0,0,0,0,0,0])
 
     for node in graph.nodes:
         print(f"Node {node}: Displacement (u_x, u_y) = ({displacements[2 * node]:.4f}, {displacements[2 * node + 1]:.4f})")
+
 
 
 # Main execution
 graph = Graph()
 createLattice(graph, spacing=1)
 graph.visualize()
+
 computeDisplacements(graph)
-graph.visualize()
+
+
+
 
 
