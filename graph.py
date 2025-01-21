@@ -124,7 +124,7 @@ class Graph:
             x2, y2 = node2.position
             ax.plot([x1, x2], [y1, y2], color="gray", zorder=1, alpha=con.weight)
 
-        # Set plot title and axis scaling
+        # Set plot title and scaling
         ax.set_title("Triangular Lattice Graph")
         ax.axis("equal")
 

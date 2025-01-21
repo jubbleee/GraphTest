@@ -65,23 +65,6 @@ def findDisplacements(graph, stiffness):
 
     return displacements
 
-''' debug file creator
-    np.savetxt(
-        "stiffness.csv",
-        stiffness,
-        delimiter=","
-    )
-    np.savetxt(
-        "forces.csv",
-        forces,
-        delimiter=","
-    )
-    np.savetxt(
-        "displacements.csv",
-        displacements,
-        delimiter=","
-    )
-'''
 
 def findLength(graph):
     lengths = []

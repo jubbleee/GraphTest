@@ -136,7 +136,7 @@ button.grid(row=9, column=0, pady=10, sticky="ew")
 button = ttk.Button(controlFrame, text="Result", command=end)
 button.grid(row=11, column=0, pady=10, sticky="ew")
 
-# Initialize the canvas variable
+# Initialize canvas
 canvas = None
 figList = []
 count = 0
