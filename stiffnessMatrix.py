@@ -53,12 +53,11 @@ def findDisplacements(graph, stiffness):
     for i in range(len(forces)):
         if i % 2 != 0 and i >= (len(forces) - 2 * np.sqrt(size)): #top nodes
             forces[i, 0] = 1
-        #elif i % 2 != 0 and i <= 2 * np.sqrt(size): #bottom nodes
-        #   forces[i,0] = -1
 
     try:
         displacements = np.linalg.solve(stiffness,forces)
         displacements = np.multiply(displacements,0.01)
+
 
     except np.linalg.linalg.LinAlgError:
         displacements = []

@@ -1,11 +1,8 @@
-import matplotlib.pyplot as plt
-from anyio import sleep
 import graph
 from stiffnessMatrix import createGlobalMatrix, findDisplacements, findLength
 import tkinter as tk
 from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import networkx
 import graphVisual
 
 global graph1
@@ -15,7 +12,7 @@ def iterate():
     global count
     figList = []
     count = 0
-    fig = graph1.visualOutput()
+    fig = graph1.visualise()
     figList.append(fig)
 
     while True:
@@ -31,38 +28,34 @@ def iterate():
         lengthEnd = findLength(graph1)
 
         graph1.weakenNodes( lengthStart, lengthEnd)
-        fig = graph1.visualOutput()
+        fig = graph1.visualise()
         fig.show()
         figList.append(fig)
 
 # Tkinter GUI Application
 def display_plot(fig):
-    global canvas  # Keep track of the current canvas
+    global canvas
 
-    # Destroy the existing canvas, if any
+    # Destroy existing canvas
     if canvas is not None:
         canvas.get_tk_widget().destroy()
 
-    # Embed the plot in the tkinter window
+    # Embed the plot in tkinter window
     canvas = FigureCanvasTkAgg(fig, master=plotFrame)
     canvasWidget = canvas.get_tk_widget()
-    canvasWidget.grid(row=0, column=0)  # Place the canvas in the plot frame
+    canvasWidget.grid(row=0, column=0)
     canvas.draw()
 
 def createButton():
     global graph1
     graph1 = graph.Graph()
-    graph1.create(sliderSize.get(), 1, sliderRandomness.get())
+    graph1.create(sliderSize.get(), sliderRandomness.get())
     print(f"Created {len(graph1.nodes)} nodes and {len(graph1.connections)} connections")
 
 def editButton():
-    #try:
-        # Initialize tkinter and the graph editor
-        editor = tk.Tk()
-        graphEditor = graphVisual.GraphEditor(editor, graph1)
-        editor.mainloop()
-    #except Exception as e:
-    #    tk.messagebox.showinfo("Error","No graph created")
+    editor = tk.Tk()
+    graphEditor = graphVisual.GraphEditor(editor, graph1)
+    editor.mainloop()
 
 def goButton():
     figList = iterate()
@@ -143,14 +136,12 @@ button.grid(row=9, column=0, pady=10, sticky="ew")
 button = ttk.Button(controlFrame, text="Result", command=end)
 button.grid(row=11, column=0, pady=10, sticky="ew")
 
-
-
 # Initialize the canvas variable
 canvas = None
 figList = []
 count = 0
 
-# Configure resizing behavior
+# Resizing behavior
 root.grid_rowconfigure(0, weight=1)
 root.grid_columnconfigure(0, weight=1)
 
