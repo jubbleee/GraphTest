@@ -4,12 +4,10 @@ from debugpy.adapter.servers import connections
 
 def createGlobalMatrix(graph):
     np.set_printoptions(precision=3, suppress=True)
+    graph.checkNodes()
     globalMatrix = np.zeros((2*len(graph.nodes), 2*len(graph.nodes)), dtype=float)
 
     for edge in graph.connections:
-        if edge.weight <= 0:
-            continue
-
         deltaX = graph.nodes[edge.node1].position[0] - graph.nodes[edge.node2].position[0]
         deltaY = graph.nodes[edge.node1].position[1] - graph.nodes[edge.node2].position[1]
         length = np.sqrt(deltaX**2 + deltaY**2)
@@ -44,7 +42,7 @@ def findDisplacements(graph, stiffness):
     forces = np.zeros((2 * size,1), dtype=float) #create force vector
 
     # remove forces on constrained nodes
-    for i in range(graph.width*2):
+    for i in range(2*len(graph.constraints)):
         forces = np.delete(forces, i, axis=0)
 
     for i in range(len(forces)):
@@ -53,9 +51,9 @@ def findDisplacements(graph, stiffness):
 
     try:
         displacements = np.linalg.solve(stiffness,forces)
-        displacements = np.multiply(displacements,0.001)
+        displacements = np.multiply(displacements,0.0005)
 
-        for i in range(graph.width*2):
+        for i in range(2*len(graph.constraints)):
             displacements = np.insert(displacements, 0, 0)
 
     except np.linalg.linalg.LinAlgError:

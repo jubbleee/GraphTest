@@ -10,6 +10,8 @@ class Graph:
         self.connections = []
         self.width = 0
         self.height = 0
+        self.constraints = []
+        self.forced = []
 
     def create(self, n, m, randomness, switch):
         self.width = m
@@ -94,58 +96,13 @@ class Graph:
         for con in self.connections:
             con.weight -= random.randint(1,randomness)/10
 
-        return self.nodes, self.connections
+        self.constraints = list(range(self.width))
+        self.forces = list(range(len(self.nodes)-self.width,len(self.nodes)))
 
-    def createAlt(self, n, m, randomness):
-        self.width = m
-        self.height = n
-        self.nodes = []
-        self.connections = []
-        offsetCount = 0
-
-        for i in range(n):
-            for j in range(m):
-                nodeID = offsetCount  # Unique ID for each node
-                x = j   # Offset odd rows
-                y = i + 0.5 * (j % 2) # Keep natural ordering without vertical flip
-
-                position = (x, y)  # Assign position
-                self.nodes.append(node.Node(nodeID, position))
-                offsetCount += 1
-
-        # Create connections to form triangles
-        for point in self.nodes:
-            x, y = point.position
-
-            for nodeObj in self.nodes:
-                nodePos = nodeObj.position
-
-                if (x , y + 1) == nodePos:  # Up
-                    self.connections.append(connection.Connection(point.id, nodeObj.id))
-                if (x , y - 1) == nodePos:  # Down
-                    self.connections.append(connection.Connection(point.id, nodeObj.id))
-                if (x - 1, y - 0.5) == nodePos:  # Bottom Left
-                    self.connections.append(connection.Connection(point.id, nodeObj.id))
-                if (x + 1, y - 0.5) == nodePos:  # Bottom Right
-                    self.connections.append(connection.Connection(point.id, nodeObj.id))
-                if (x - 1, y + 0.5) == nodePos:  # Top Left
-                    self.connections.append(connection.Connection(point.id, nodeObj.id))
-                if (x + 1, y + 0.5) == nodePos:  # Top Right
-                    self.connections.append(connection.Connection(point.id, nodeObj.id))
-
-        # Remove duplicate connections
-        unique_connections = set()
-        for con in self.connections:
-            pair = tuple(sorted([con.node1, con.node2]))
-            unique_connections.add(pair)
-
-        self.connections = [connection.Connection(n1, n2) for n1, n2 in unique_connections]
-
-        # Randomize connection weights
-        for con in self.connections:
-            con.weight -= random.randint(1, randomness) / 10
+        self.checkNodes()
 
         return self.nodes, self.connections
+
 
     def moveNodes(self, displace):
         count = 0
@@ -163,15 +120,49 @@ class Graph:
             i -= 1
             change = np.abs(start[i]-end[i])
             currentConnection = self.connections[i]
-            currentConnection.weight -= np.abs(change)*3
+            currentConnection.weight -= np.abs(change)
 
-            if currentConnection.weight < 0:
+            if currentConnection.weight < 0.8:
                 conToRemove.append(self.connections[i])
 
             self.connections[i] = currentConnection
 
+            print(self.connections[i].node1, self.connections[i].node2, self.connections[i].weight)
+
         for con in conToRemove:
             self.connections.remove(con)
+
+        self.checkNodes()
+
+    def checkNodes(self):
+        for node in self.nodes:
+            var = False
+            for con in self.connections: #check if connected to anything
+                if con.node1 == node.id or con.node2 == node.id:
+                    var = True
+                    continue
+
+            if var == False: #if not remove node - change length of forces and constraints
+                if node.id in self.constraints:
+                    self.constraints.remove(node.id)
+                if node.id in self.forces:
+                    self.forces.remove(node.id)
+
+                for val in self.nodes: #change id's to compensate missing nodes
+                    if val.id > node.id:
+                        val.id -= 1
+                for val in self.constraints: #reduce constraint points
+                    if val > node.id:
+                        val -= 1
+                for val in self.forces: #reduce force points
+                    if val > node.id:
+                        val -= 1
+                for val in self.connections: #reduce connection ids
+                    if val.node1 > node.id:
+                        val.node1 -= 1
+                    if val.node2 > node.id:
+                        val.node2 -= 1
+                self.nodes.remove(node)
 
 
     def visualise(self):
@@ -180,17 +171,16 @@ class Graph:
 
         # Plot nodes
         for point in self.nodes:
-            if point.id < self.width:
+            if point.id < len(self.constraints):
                 colour = "white"
-            elif point.id > len(self.nodes) - 1 - self.width:
+            elif point.id > len(self.nodes) - 1 - len(self.forces):
                 colour = "red"
             else:
                 colour = "skyblue"
 
             x, y = point.position
-            ax.scatter(x, y, color=colour, s=300, zorder=2)
-            ax.text(x, y, f"{point
-                    .id}", fontsize=12, ha="center", va="center", zorder=3)
+            ax.scatter(x, y, color=colour, s=50, zorder=2)
+            ax.text(x, y, f"{point.id}", fontsize=8, ha="center", va="center", zorder=3)
 
         # Plot connections
         for con in self.connections:

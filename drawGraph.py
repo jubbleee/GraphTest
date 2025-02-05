@@ -35,18 +35,54 @@ def iterate():
             fig.show()
             figList.append(fig)
             prevCons = len(graph1.connections)
+            for con in graph1.connections:
+                con.weight = 1
 
 def displayPlot(fig):
-    global canvas
+    global canvas, ax
 
-    #delete existing canvas
+    # Delete existing canvas
     if canvas is not None:
         canvas.get_tk_widget().destroy()
 
-    # plot in tkinter window
+    # Embed the figure in the Tkinter window
     canvas = FigureCanvasTkAgg(fig, master=plotFrame)
     canvasWidget = canvas.get_tk_widget()
     canvasWidget.grid(row=0, column=0)
+
+    # Connect mouse scroll event
+    canvasWidget.bind("<Button-4>", zoom)  # For Linux
+    canvasWidget.bind("<Button-5>", zoom)  # For Linux
+    canvasWidget.bind("<MouseWheel>", zoom)  # For Windows and Mac
+
+    canvas.draw()
+
+
+def zoom(event):
+    scale_factor = 1.05  # More subtle zoom
+    ax = canvas.figure.axes[0]  # Get the main axis
+
+    # Get current axis limits
+    xlim = ax.get_xlim()
+    ylim = ax.get_ylim()
+
+    # Convert mouse position from canvas coordinates to data coordinates
+    xdata = ax.transData.inverted().transform((event.x, event.y))[0]
+    ydata = ax.transData.inverted().transform((event.x, event.y))[1]
+
+    # Adjust limits based on scroll direction
+    if event.delta > 0:  # Scroll up (Zoom in)
+        new_xlim = [xdata + (x - xdata) / scale_factor for x in xlim]
+        new_ylim = [ydata + (y - ydata) / scale_factor for y in ylim]
+    else:  # Scroll down (Zoom out)
+        new_xlim = [xdata + (x - xdata) * scale_factor for x in xlim]
+        new_ylim = [ydata + (y - ydata) * scale_factor for y in ylim]
+
+    # Apply new limits
+    ax.set_xlim(new_xlim)
+    ax.set_ylim(new_ylim)
+
+    # Redraw the canvas
     canvas.draw()
 
 def createButton():
@@ -139,7 +175,7 @@ sliderSize.grid(row=2, column=0, pady=(0, 10), sticky="ew")
 
 labelSizeW = tk.Label(controlFrame, text="Network Width:")
 labelSizeW.grid(row=3, column=0, pady=(10, 0), sticky="w")
-sliderWidth = tk.Scale(controlFrame, from_=3, to=20, orient="horizontal")
+sliderWidth = tk.Scale(controlFrame, from_=3, to=20, resolution=2, orient="horizontal")
 sliderWidth.grid(row=4, column=0, pady=(0, 10), sticky="ew")
 
 #randomness slider
