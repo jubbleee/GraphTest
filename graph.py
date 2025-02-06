@@ -11,7 +11,7 @@ class Graph:
         self.width = 0
         self.height = 0
         self.constraints = []
-        self.forced = []
+        self.forces = []
 
     def create(self, n, m, randomness, switch):
         self.width = m
@@ -54,7 +54,7 @@ class Graph:
                     if (x-0.5,y+1) == nodePos: #TopLeft
                         self.connections.append(connection.Connection(point.id,nodeObj.id))
 
-                    if (x-0.5,y+1) == nodePos: #BottomLeft
+                    if (x-0.5,y-1) == nodePos: #BottomLeft
                         self.connections.append(connection.Connection(point.id,nodeObj.id))
 
         else:
@@ -90,8 +90,15 @@ class Graph:
 
         for connection1 in self.connections:
             for connection2 in self.connections:
-                if (connection1.node1 == connection2.node2 and connection1.node2 == connection2.node1):
+                if connection1.node1 == connection2.node2 and connection1.node2 == connection2.node1:
+                    self.connections.remove(connection1)
+
+        for connection1 in self.connections:
+            for connection2 in self.connections:
+                if connection1.node1 == connection2.node2 and connection1.node2 == connection2.node1:
                     self.connections.remove(connection2)
+
+        print(len(self.connections))
 
         for con in self.connections:
             con.weight -= random.randint(1,randomness)/10
