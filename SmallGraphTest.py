@@ -123,17 +123,12 @@ def createGlobalMatrix(graph):
 def computeDisplacements(graph):
     globalMatrix = createGlobalMatrix(graph)
 
-    print(globalMatrix)
-
     #forces = [0,0,0,0,0,1]
     forces = [0,1,0,1]
     displacements = np.linalg.solve(globalMatrix, forces)
-    print(np.linalg.det(globalMatrix))
+
 
     displacements = np.insert(displacements, 0, [0,0,0,0,0,0])
-
-    for node in graph.nodes:
-        print(f"Node {node}: Displacement (u_x, u_y) = ({displacements[2 * node]:.4f}, {displacements[2 * node + 1]:.4f})")
 
 
 

@@ -13,7 +13,7 @@ class Graph:
         self.constraints = []
         self.forces = []
 
-    def create(self, n, m, randomness, switch):
+    def create(self, n, m, randomness, posRandom, switch):
         self.width = m
         self.height = n
         offsetCount = 0
@@ -101,7 +101,13 @@ class Graph:
         print(len(self.connections))
 
         for con in self.connections:
-            con.weight -= random.randint(1,randomness)/10
+            con.weight -= random.uniform(0,0.05*(randomness-1))
+
+        for nodeObj in self.nodes:
+            (x,y) = nodeObj.position
+            x = x + random.uniform(-0.05*(posRandom-1),0.05*(posRandom-1))
+            y = y + random.uniform(-0.05*(posRandom-1),0.05*(posRandom-1))
+            nodeObj.position = (x,y)
 
         self.constraints = list(range(self.width))
         self.forces = list(range(len(self.nodes)-self.width,len(self.nodes)))
@@ -129,12 +135,10 @@ class Graph:
             currentConnection = self.connections[i]
             currentConnection.weight -= np.abs(change)
 
-            if currentConnection.weight < 0.8:
+            if currentConnection.weight < 0.1:
                 conToRemove.append(self.connections[i])
 
             self.connections[i] = currentConnection
-
-            print(self.connections[i].node1, self.connections[i].node2, self.connections[i].weight)
 
         for con in conToRemove:
             self.connections.remove(con)
@@ -159,9 +163,13 @@ class Graph:
                     if val.id > node.id:
                         val.id -= 1
                 for val in self.constraints: #reduce constraint points
+                    if val == node.id:
+                        self.constraints.remove(val)
                     if val > node.id:
                         val -= 1
                 for val in self.forces: #reduce force points
+                    if val == node.id:
+                        self.forces.remove(val)
                     if val > node.id:
                         val -= 1
                 for val in self.connections: #reduce connection ids

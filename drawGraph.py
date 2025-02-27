@@ -15,7 +15,9 @@ def iterate():
     fig = graph1.visualise()
     figList.append(fig)
     prevCons = len(graph1.connections)
+    figNum = 0
     while True:
+        figNum+=1
         globalMatrix = createGlobalMatrix(graph1)
         lengthStart = findLength(graph1)
 
@@ -35,8 +37,9 @@ def iterate():
             fig.show()
             figList.append(fig)
             prevCons = len(graph1.connections)
-            for con in graph1.connections:
-                con.weight = 1
+            print(figNum)
+            #for con in graph1.connections:
+            #    con.weight = 1
 
 def displayPlot(fig):
     global canvas, ax
@@ -102,7 +105,7 @@ def createButton():
 def onButton1Click():
     global graph1
     graph1 = graph.Graph()
-    graph1.create(sliderSize.get(), sliderWidth.get(), sliderRandomness.get(),1)
+    graph1.create(sliderSize.get(), sliderWidth.get(), sliderRandomness.get(),sliderNodeRandomness.get(),1)
     print(f"Created {len(graph1.nodes)} nodes and {len(graph1.connections)} connections")
     createRoot.destroy()
     editButton()
@@ -110,7 +113,7 @@ def onButton1Click():
 def onButton2Click():
     global graph1
     graph1 = graph.Graph()
-    graph1.create(sliderSize.get(), sliderWidth.get(), sliderRandomness.get(),2)
+    graph1.create(sliderSize.get(), sliderWidth.get(), sliderRandomness.get(),sliderNodeRandomness.get(),2)
     print(f"Created {len(graph1.nodes)} nodes and {len(graph1.connections)} connections")
     createRoot.destroy()
     editButton()
@@ -179,22 +182,27 @@ sliderWidth = tk.Scale(controlFrame, from_=3, to=20, resolution=2, orient="horiz
 sliderWidth.grid(row=4, column=0, pady=(0, 10), sticky="ew")
 
 #randomness slider
-label_randomness = tk.Label(controlFrame, text="Weighting Randomness:")
-label_randomness.grid(row=5, column=0, pady=(10, 0), sticky="w")
+labelRandomness = tk.Label(controlFrame, text="Weighting Randomness:")
+labelRandomness.grid(row=5, column=0, pady=(10, 0), sticky="w")
 sliderRandomness = tk.Scale(controlFrame, from_=1, to=10, orient="horizontal")
 sliderRandomness.grid(row=6, column=0, pady=(0, 10), sticky="ew")
 
+labelNodeRandomness = tk.Label(controlFrame, text="Position Randomness:")
+labelNodeRandomness.grid(row=7, column=0, pady=(10, 0), sticky="w")
+sliderNodeRandomness = tk.Scale(controlFrame, from_=1, to=10, orient="horizontal")
+sliderNodeRandomness.grid(row=8, column=0, pady=(0, 10), sticky="ew")
+
 #create graph button
 button = ttk.Button(controlFrame, text="Graph Create", command=createButton)
-button.grid(row=7, column=0, pady=10, sticky="ew")
+button.grid(row=9, column=0, pady=10, sticky="ew")
 
 #generate button
 button = ttk.Button(controlFrame, text="Generate Plot", command=goButton)
-button.grid(row=9, column=0, pady=10, sticky="ew")
+button.grid(row=11, column=0, pady=10, sticky="ew")
 
 #skip to end button
 button = ttk.Button(controlFrame, text="Result", command=end)
-button.grid(row=11, column=0, pady=10, sticky="ew")
+button.grid(row=13, column=0, pady=10, sticky="ew")
 
 #create canvas to display result
 canvas = None
