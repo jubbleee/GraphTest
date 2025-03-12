@@ -10,8 +10,8 @@ def createGlobalMatrix(graph):
     for edge in graph.connections:
         deltaX = graph.nodes[edge.node1].position[0] - graph.nodes[edge.node2].position[0]
         deltaY = graph.nodes[edge.node1].position[1] - graph.nodes[edge.node2].position[1]
-        length = np.sqrt(deltaX**2 + deltaY**2)
-        angle = np.arctan2(deltaY, deltaX)
+        length = np.sqrt(deltaX**2 + deltaY**2) #find edge length
+        angle = np.arctan2(deltaY, deltaX) #find edge angle
         c = np.cos(angle)
         s = np.sin(angle)
 
@@ -23,9 +23,11 @@ def createGlobalMatrix(graph):
 
         elementMatrix = np.dot(elementMatrix, 1/length)
 
+        #scale node id's as each node takes up 2 columns
         id1 = edge.node1 * 2
         id2 = edge.node2 * 2
 
+        #assemble global matrix
         globalMatrix[id1:id1 + 2, id1:id1 + 2] += elementMatrix[0:2,0:2]
         globalMatrix[id2:id2 + 2, id1:id1 + 2] += elementMatrix[2:4,0:2]
         globalMatrix[id1:id1 + 2, id2:id2 + 2] += elementMatrix[0:2,2:4]

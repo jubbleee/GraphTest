@@ -129,14 +129,15 @@ class Graph:
 
     def weakenNodes(self, start, end):
         conToRemove = []
+        failureThreshold = 0
         for i in range(len(self.connections)):
             i -= 1
-            change = np.abs(start[i]-end[i])
+            change = np.abs(start[i]-end[i]) #calculate length change
             currentConnection = self.connections[i]
-            currentConnection.weight -= np.abs(change)
+            currentConnection.weight -= np.abs(change) #weaken edge depending on change
 
-            if currentConnection.weight < 0.1:
-                conToRemove.append(self.connections[i])
+            if currentConnection.weight < failureThreshold:
+                conToRemove.append(self.connections[i]) #remove edge from
 
             self.connections[i] = currentConnection
 
